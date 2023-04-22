@@ -8,6 +8,7 @@ def calculate(*args):
         meters.set(int(0.3048 *  value * 10000.0 + 0.5)/10000.0)
     except ValueError:
         pass
+    
 
 # N = tk.N
 # W = tk.W
@@ -30,7 +31,11 @@ feet_entry.grid(row=1, column=2, sticky=(W,E))
 meters = tk.StringVar()
 ttk.Label(mainframe, textvariable=meters).grid(row=2, column=2, sticky=(W,E))
 
+pb = ttk.Progressbar(mainframe, orient='horizontal', length=4, mode="determinate").grid(row=3, column=1, sticky=(W,E))
+
 ttk.Button(mainframe, text="Calculate", command=calculate).grid(row=3, column=2, sticky=W)
+
+
 
 ttk.Label(mainframe, text="feet").grid(row=1, column=3, sticky=W)
 ttk.Label(mainframe, text="is equivalent to").grid(row=2, column=1, sticky=E)
