@@ -5,7 +5,7 @@ This is a homebrew offline version of my Spotify Guessing Game.  I've had this i
 First, you select which
 
 # Game Modes
-There are 3 game modes available 
+There are 3 game modes available
 * Heardle
 * Score
 * Survival

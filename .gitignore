@@ -130,3 +130,6 @@ dmypy.json
 
 # VSCode Stuff
 .vscode/
+
+# MP3 Files
+music-test/
