@@ -84,6 +84,8 @@ class MainWidget(QWidget):
 
         self.ProgressBarRunning = 0
 
+        self.currentSong = "Debug"
+
         # > Sets the program to debug mode to print things out to the console
         self.debugMode = isDebugModeOn
 
@@ -165,6 +167,7 @@ class MainWidget(QWidget):
     # @method: Creates the button to enter their guess
     def createSearchEnterButton(self):
         self.searchEnterButton = QPushButton("Guess", self)
+        self.searchEnterButton.clicked.connect(self.checkGuess)
 
 
     # @method: Creates the Grid Layout that the buttons go in
@@ -244,7 +247,7 @@ class MainWidget(QWidget):
         self.ProgressBar.setValue(value)
         
 
-    # @method: increases the time limit of the song, based on the values in self.limitsIndex
+    # @method: Increases the time limit of the song, based on the values in self.limitsIndex
     def increaseLimit(self):
         # > if we're at the end of the list, then just return to prevent out of index
         # TODO: Make it a failure to skip when at max limit
@@ -253,7 +256,23 @@ class MainWidget(QWidget):
         self.limitsIndex += 1
         self.currentLimit = self.limits[self.limitsIndex]
 
-        self.thread.updateCurrentLimit(self.currentLimit)
+        if self.thread in locals():
+            self.thread.updateCurrentLimit(self.currentLimit)
+    
+
+    # @method: Takes the text from the textbox, check if it is a valid song, and then checks if it matches the mystery song
+    def checkGuess(self):
+        guess = self.inputTextbox.text()
+        if self.debugMode: print(guess)
+        if not guess:
+            if self.debugMode: print("Empty guess")
+            return
+        #TODO: check if guess is a valid song, if it isn't, don't take away a guess
+        if guess == self.currentSong:
+            if self.debugMode: print("WINNER")
+        else:
+            if self.debugMode: print("FAILURE")
+            self.increaseLimit()
 
 
 # @class: Class that makes the actual window that the user will see
@@ -295,7 +314,7 @@ if __name__ == '__main__':
 
     app.setStyleSheet(darkStyle)
 
-    # app.setStyleSheet("QPushButton {border-style: outset; border-width: 0px;}")
+    print("Debug mode is", isDebugModeOn)
   
     # create the instance of our Window
     window = Window()
