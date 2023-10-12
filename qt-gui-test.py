@@ -27,7 +27,6 @@ class ThreadIncreaseProgress(QThread):
             self.startProgress()
         else:
             self.stopProgress()
-    #TODO: add Stop
 
     def startProgress(self):
         if self.debugMode:
@@ -102,6 +101,13 @@ class MainWidget(QWidget):
         self.createLayout()
 
 
+
+
+    #*************************************
+    #*  Start of initialization functions
+    #*************************************
+
+    # @method: Creates the Progress bar (shows how much of the song has been played)
     def createProgressBar(self):
          # creating progress bar
         self.ProgressBar = QProgressBar(self)
@@ -127,6 +133,7 @@ class MainWidget(QWidget):
                           "}")
 
 
+    # @method: Creates the skip button, which skips guess and increases the song limit
     def createSkipButton(self):
         self.SkipButton = QPushButton("Skip", self)
         self.SkipButton.clicked.connect(self.increaseLimit)
@@ -134,6 +141,8 @@ class MainWidget(QWidget):
         self.SkipButton.setMaximumSize(QSize(100,50))
         self.SkipButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
 
+
+    # @method: Creates the play button, which starts and stops the song depending if the song is playing or not
     def createPlayButton(self):
         self.PlayButton = QPushButton(self)
         self.PlayButton.clicked.connect(self.playButtonPressed)
@@ -145,15 +154,20 @@ class MainWidget(QWidget):
         self.PlayButton.setStyleSheet("background-color:transparent")
         self.PlayButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
+
+    # @method: Creates the input textbox, where the player guesses what the current song is
     def createInputTextbox(self):
         self.inputTextbox = QLineEdit(self)
         self.inputTextbox.setPlaceholderText("Enter Guess Here")
         self.inputTextbox.setStyleSheet("background-color:LightBlue; color:black")
 
+
+    # @method: Creates the button to enter their guess
     def createSearchEnterButton(self):
         self.searchEnterButton = QPushButton("Guess", self)
 
 
+    # @method: Creates the Grid Layout that the buttons go in
     def createLayout(self):
         self.layout  = QGridLayout()
         self.layout.addWidget(self.ProgressBar, 5, 0, 1, 5)
@@ -170,10 +184,12 @@ class MainWidget(QWidget):
         self.setLayout(self.layout)
 
 
-    # @method: this method is to make a debug list for qCompleter
+    # @method: Creates a debug list for qCompleter
     def createDebugList(self):
         self.debugList = ["ABC", "Test", "The Boxer"]
 
+
+    # @method: Creates a the QCompleter that auto-completes the text in the search box
     def createQCompleter(self, lineEdit):
         self.createDebugList()
         self.completer = QCompleter(self.debugList, lineEdit)
@@ -182,8 +198,11 @@ class MainWidget(QWidget):
 
 
 
+    #*************************************
+    #*  Start of functionality functions
+    #*************************************
 
-
+    # @method: Either runs the startProgress or stopProgress when the play button is pressed
     def playButtonPressed(self):
         # > Check if the progress bar is running
         # > If it is running, then stop the progress bar (and eventually stop the song)
@@ -195,6 +214,8 @@ class MainWidget(QWidget):
         else:
             self.stopProgress()
 
+
+    # @method: Plays the song from the beginning and starts the progress bar
     def startProgress(self):
         self.ProgressBarRunning = 1
 
@@ -209,6 +230,7 @@ class MainWidget(QWidget):
         self.thread.start()
 
 
+    # @method: Stops the song, stops the progress bar, and sets the progress bar back to 0 
     def stopProgress(self):
         self.ProgressBarRunning = 0
         self.thread.stopProgress()
@@ -217,10 +239,12 @@ class MainWidget(QWidget):
         self.setProgressValue(0)
 
 
+    # @method: Sets the progress bar value to the parameter value
     def setProgressValue(self, value):
         self.ProgressBar.setValue(value)
         
 
+    # @method: increases the time limit of the song, based on the values in self.limitsIndex
     def increaseLimit(self):
         # > if we're at the end of the list, then just return to prevent out of index
         # TODO: Make it a failure to skip when at max limit
@@ -232,7 +256,7 @@ class MainWidget(QWidget):
         self.thread.updateCurrentLimit(self.currentLimit)
 
 
-
+# @class: Class that makes the actual window that the user will see
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -259,7 +283,9 @@ class Window(QMainWindow):
         # showing all the widgets
         self.show()
 
-# main method
+#******************
+#*   main method
+#******************
 if __name__ == '__main__':
       
     # create pyqt5 app
