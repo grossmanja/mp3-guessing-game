@@ -34,9 +34,8 @@ class ThreadIncreaseProgress(QThread):
             start = time.time()
         i = 0
         self.running = True
-        #TODO: add threadActive
+
         while self.running and i < self.currentLimit + 1:
-            
             # slowing down the loop
             time.sleep(0.0485)
 
@@ -86,6 +85,8 @@ class MainWidget(QWidget):
 
         self.currentSong = "Debug"
 
+        self.currentGuess = 0
+
         # > Sets the program to debug mode to print things out to the console
         self.debugMode = isDebugModeOn
 
@@ -99,6 +100,7 @@ class MainWidget(QWidget):
         self.createInputTextbox()
         self.createQCompleter(self.inputTextbox)
         self.createSearchEnterButton()
+        self.createGuessTable()
 
         self.createLayout()
 
@@ -176,10 +178,12 @@ class MainWidget(QWidget):
         self.layout.addWidget(self.ProgressBar, 5, 0, 1, 5)
         self.layout.addWidget(self.PlayButton, 4, 2)
         self.layout.addWidget(self.SkipButton, 4, 4)
-        self.layout.addWidget(self.inputTextbox, 7, 0, 1, 4)
-        self.layout.addWidget(self.searchEnterButton, 7, 4)
+        self.layout.addWidget(self.inputTextbox, 6, 0, 1, 4)
+        self.layout.addWidget(self.searchEnterButton, 6, 4)
+        self.layout.addWidget(self.guessTable, 0, 1, 4, 3)
 
         for i in range(self.layout.rowCount()):
+            if i == 1: continue
             self.layout.setRowStretch(i, 1)
         
         if self.debugMode: print("row:", self.layout.rowCount(),"column", self.layout.columnCount())
@@ -198,12 +202,49 @@ class MainWidget(QWidget):
         self.completer = QCompleter(self.debugList, lineEdit)
         self.completer.setCaseSensitivity(0)
         lineEdit.setCompleter(self.completer)
+    
+    def createGuessTable(self):
+        self.guessTable = QTableView()
+        # self.guessTable.setRowCount(6)
+        for i in range(6):
+            self.guessTable.showRow(i)
+
+        self.guessTable.showColumn(0)
+        self.guessTable.resizeRowsToContents()
+
+        self.guessTable.verticalHeader().hide()
+        self.guessTable.horizontalHeader().hide()
+
+        self.guessTable.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.guessTable.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.guessTable.setShowGrid(False)
+        
+        self.guessTable.setStyleSheet("""
+            QTableView::item
+                border: 2px;
+                border-radius: 7px;
+            """
+        )
+
+        temp = []
+        for i in range(6):
+            tempString = str(i+1)
+            tempString += ")"
+            temp.append([tempString])
+
+        self.model = TableModel(temp)
+        self.guessTable.setModel(self.model)
+
+        
 
 
 
     #*************************************
     #*  Start of functionality functions
     #*************************************
+
+
+
 
     # @method: Either runs the startProgress or stopProgress when the play button is pressed
     def playButtonPressed(self):
@@ -273,6 +314,38 @@ class MainWidget(QWidget):
         else:
             if self.debugMode: print("FAILURE")
             self.increaseLimit()
+            self.model.setData(self.limitsIndex - 1, guess)
+            self.guessTable.repaint()
+
+
+
+
+# @class: Class that handles the table for showing guesses
+class TableModel(QAbstractTableModel):
+    def __init__(self, data):
+        super(TableModel, self).__init__()
+        self.data = data
+
+    def data(self, index, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            return self.data[index.row()][0]
+    
+    def rowCount(self, index):
+        return len(self.data)
+    
+    def columnCount(self, index):
+        return len(self.data[0])
+    
+    def setData(self, index, value):
+        if isinstance(value, str):
+            tempString = ""
+            tempString += str(index + 1)
+            tempString += ") " + value
+            self.data[index][0] = tempString
+            return True
+        return False
+    
+
 
 
 # @class: Class that makes the actual window that the user will see
