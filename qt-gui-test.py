@@ -76,10 +76,10 @@ class MainWidget(QWidget):
         self.limits = [20,40,80,140,220,320]
 
         #set starting index in self.limits
-        self.limitsIndex = 0
+        self.currentGuessIndex = 0
 
         #set the current limit
-        self.currentLimit = self.limits[self.limitsIndex]
+        self.currentLimit = self.limits[self.currentGuessIndex]
 
         self.ProgressBarRunning = 0
 
@@ -140,7 +140,7 @@ class MainWidget(QWidget):
     # @method: Creates the skip button, which skips guess and increases the song limit
     def createSkipButton(self):
         self.SkipButton = QPushButton("Skip", self)
-        self.SkipButton.clicked.connect(self.increaseLimit)
+        self.SkipButton.clicked.connect(self.skipButtonPressed)
 
         self.SkipButton.setMaximumSize(QSize(100,50))
         self.SkipButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
@@ -180,11 +180,17 @@ class MainWidget(QWidget):
         self.layout.addWidget(self.SkipButton, 4, 4)
         self.layout.addWidget(self.inputTextbox, 6, 0, 1, 4)
         self.layout.addWidget(self.searchEnterButton, 6, 4)
-        self.layout.addWidget(self.guessTable, 0, 1, 4, 3)
+        self.layout.addWidget(self.guessTable, 1, 1, 3, 3)
 
         for i in range(self.layout.rowCount()):
-            if i == 1: continue
             self.layout.setRowStretch(i, 1)
+        
+        # for i in range(self.layout.columnCount()):
+        self.layout.setColumnStretch(0, 0)
+        self.layout.setColumnMinimumWidth(0, 100)
+
+        self.layout.setRowStretch(0, 0)
+        self.layout.setRowMinimumHeight(0, 10)
         
         if self.debugMode: print("row:", self.layout.rowCount(),"column", self.layout.columnCount())
 
@@ -223,8 +229,11 @@ class MainWidget(QWidget):
             QTableView::item
                 border: 2px;
                 border-radius: 7px;
+                font-size:18;
             """
         )
+
+        self.guessTable.setFont(QFont("Roboto", 18))
 
         temp = []
         for i in range(6):
@@ -288,18 +297,33 @@ class MainWidget(QWidget):
         self.ProgressBar.setValue(value)
         
 
-    # @method: Increases the time limit of the song, based on the values in self.limitsIndex
+    # @method: Increases the time limit of the song, based on the values in self.currentGuessIndex
     def increaseLimit(self):
         # > if we're at the end of the list, then just return to prevent out of index
         # TODO: Make it a failure to skip when at max limit
-        if self.limitsIndex == len(self.limits) - 1: return
+        if self.currentGuessIndex == len(self.limits) - 1: 
+            return
 
-        self.limitsIndex += 1
-        self.currentLimit = self.limits[self.limitsIndex]
+        self.currentGuessIndex += 1
+        self.currentLimit = self.limits[self.currentGuessIndex]
 
         if self.thread in locals():
             self.thread.updateCurrentLimit(self.currentLimit)
     
+    def skipButtonPressed(self):
+        # TODO: Make it a fail when you skip at the last guess
+        if self.currentGuessIndex >= len(self.limits) - 1:
+            return
+        else:
+            self.updateGuessTable()
+            self.increaseLimit()
+
+
+    # @method: Adds guess to the guess table, index based on self.currentGuessIndex
+    def updateGuessTable(self, guess="Skipped"):
+        self.model.setData(self.currentGuessIndex, guess)
+        self.guessTable.repaint()
+
 
     # @method: Takes the text from the textbox, check if it is a valid song, and then checks if it matches the mystery song
     def checkGuess(self):
@@ -313,9 +337,8 @@ class MainWidget(QWidget):
             if self.debugMode: print("WINNER")
         else:
             if self.debugMode: print("FAILURE")
+            self.updateGuessTable(guess)
             self.increaseLimit()
-            self.model.setData(self.limitsIndex - 1, guess)
-            self.guessTable.repaint()
 
 
 
@@ -348,6 +371,12 @@ class TableModel(QAbstractTableModel):
 
 
 
+# @class: The Victory/Defeat Screen Widget that appears after you either guess correctly, or after 6 incorrect guesses
+
+
+
+
+
 # @class: Class that makes the actual window that the user will see
 class Window(QMainWindow):
     def __init__(self):
@@ -356,16 +385,16 @@ class Window(QMainWindow):
         self.setCentralWidget(MainWidget())
 
 
-        self.menu = self.menuBar()
-        self.fileMenu = self.menu.addMenu('&File')
+        # self.menu = self.menuBar()
+        # self.fileMenu = self.menu.addMenu('&File')
 
         self.status = QStatusBar()
-        self.status.showMessage("GUI Test V0.1")
+        self.status.showMessage("GUI Test V0.8")
         self.setStatusBar(self.status)
 
         # setting window geometry
         # self.setGeometry(300, 300, 800, 600)
-        self.setFixedSize(800, 600)
+        self.setFixedSize(1200, 900)
 
         # setting window action
         self.setWindowTitle("PyQT GUI Test")
@@ -374,6 +403,12 @@ class Window(QMainWindow):
 
         # showing all the widgets
         self.show()
+
+
+    def changeEndScreen(self):
+        self.setCentralWidget()
+
+
 
 #******************
 #*   main method
