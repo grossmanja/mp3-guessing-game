@@ -168,11 +168,19 @@ class MainWidget(QWidget):
         self.inputTextbox.setPlaceholderText("Enter Guess Here")
         self.inputTextbox.setStyleSheet("background-color:LightBlue; color:black")
 
+        self.inputTextbox.setMaximumHeight(100)
+        self.inputTextbox.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+
+        self.inputTextbox.setFont(QFont("Roboto", 16))
+
 
     # @method: Creates the button to enter their guess
     def createSearchEnterButton(self):
         self.searchEnterButton = QPushButton("Guess", self)
         self.searchEnterButton.clicked.connect(self.checkGuess)
+
+        self.searchEnterButton.setMaximumSize(QSize(100,50))
+        self.PlayButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
 
     # @method: Creates the Grid Layout that the buttons go in
@@ -180,8 +188,8 @@ class MainWidget(QWidget):
         self.layout = QGridLayout()
         self.layout.addWidget(self.ProgressBar, 5, 0, 1, 5)
         self.layout.addWidget(self.PlayButton, 4, 2)
-        self.layout.addWidget(self.SkipButton, 4, 4)
-        self.layout.addWidget(self.inputTextbox, 6, 0, 1, 4)
+        self.layout.addWidget(self.SkipButton, 6, 0)
+        self.layout.addWidget(self.inputTextbox, 6, 1, 1, 3)
         self.layout.addWidget(self.searchEnterButton, 6, 4)
         self.layout.addWidget(self.guessTable, 1, 1, 3, 3)
 
@@ -191,6 +199,9 @@ class MainWidget(QWidget):
         # for i in range(self.layout.columnCount()):
         self.layout.setColumnStretch(0, 0)
         self.layout.setColumnMinimumWidth(0, 100)
+
+        self.layout.setColumnStretch(4, 0)
+        self.layout.setColumnMinimumWidth(4, 100)
 
         self.layout.setRowStretch(0, 0)
         self.layout.setRowMinimumHeight(0, 10)
@@ -212,48 +223,83 @@ class MainWidget(QWidget):
         self.completer.setCaseSensitivity(0)
         lineEdit.setCompleter(self.completer)
     
+    # def createGuessTable(self):
+    #     self.guessTable = QTableView()
+    #     # self.guessTable.setRowCount(6)
+    #     for i in range(6):
+    #         self.guessTable.showRow(i)
+
+    #     self.guessTable.showColumn(0)
+    #     self.guessTable.resizeRowsToContents()
+
+    #     self.guessTable.verticalHeader().hide()
+    #     self.guessTable.horizontalHeader().hide()
+
+    #     self.guessTable.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    #     self.guessTable.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+    #     self.guessTable.setShowGrid(False)
+        
+    #     self.guessTable.setStyleSheet("""
+    #         QTableView::item
+    #             border: 2px;
+    #             border-radius: 7px;
+    #             font-size:18;
+    #         """
+    #     )
+
+    #     self.guessTable.setFont(QFont("Roboto", 18))
+
+    #     temp = []
+    #     for i in range(6):
+    #         tempString = str(i+1)
+    #         tempString += ")"
+    #         temp.append([tempString])
+
+    #     self.model = TableModel(temp)
+    #     self.guessTable.setModel(self.model)
+
+    #@method: This version of createGuessTable will use QTableWidget instead of QTableView
     def createGuessTable(self):
-        self.guessTable = QTableView()
-        # self.guessTable.setRowCount(6)
+        self.guessTable = QTableWidget(6, 1)
+
         for i in range(6):
             self.guessTable.showRow(i)
-
-        self.guessTable.showColumn(0)
-        self.guessTable.resizeRowsToContents()
-
+        
         self.guessTable.verticalHeader().hide()
         self.guessTable.horizontalHeader().hide()
 
         self.guessTable.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.guessTable.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.guessTable.setShowGrid(False)
-        
+
         self.guessTable.setStyleSheet("""
             QTableView::item
                 border: 2px;
                 border-radius: 7px;
-                font-size:18;
-            """
-        )
+                font-size:18;                       
+                                      
+        
+        """)
 
         self.guessTable.setFont(QFont("Roboto", 18))
 
-        temp = []
+
         for i in range(6):
             tempString = str(i+1)
             tempString += ")"
-            temp.append([tempString])
+            self.guessTable.setItem(i, 0, QTableWidgetItem(tempString))
+            
 
-        self.model = TableModel(temp)
-        self.guessTable.setModel(self.model)
+
+
 
         
 
 
 
-    #*************************************
-    #*  Start of functionality functions
-    #*************************************
+#*************************************
+#*  Start of functionality functions
+#*************************************
 
 
 
@@ -324,7 +370,17 @@ class MainWidget(QWidget):
 
     # @method: Adds guess to the guess table, index based on self.currentGuessIndex
     def updateGuessTable(self, guess="Skipped"):
-        self.model.setData(self.currentGuessIndex, guess)
+        # self.model.setData(self.currentGuessIndex, guess)
+        tempString = str(self.currentGuessIndex + 1) + ") " + guess
+        # tempString 
+        
+        tempTableItem = QTableWidgetItem(tempString)
+
+        tempTableItem.setForeground(QColor(255, 0, 0))
+
+        self.guessTable.setItem(self.currentGuessIndex, 0, tempTableItem)
+        # self.guessTable.g
+
         self.guessTable.repaint()
 
 
@@ -346,30 +402,30 @@ class MainWidget(QWidget):
 
 
 
-# @class: Class that handles the table for showing guesses
-class TableModel(QAbstractTableModel):
-    def __init__(self, data):
-        super(TableModel, self).__init__()
-        self.data = data
+# # @class: Class that handles the table for showing guesses
+# class TableModel(QAbstractTableModel):
+#     def __init__(self, data):
+#         super(TableModel, self).__init__()
+#         self.data = data
 
-    def data(self, index, role):
-        if role == Qt.ItemDataRole.DisplayRole:
-            return self.data[index.row()][0]
+#     def data(self, index, role):
+#         if role == Qt.ItemDataRole.DisplayRole:
+#             return self.data[index.row()][0]
     
-    def rowCount(self, index):
-        return len(self.data)
+#     def rowCount(self, index):
+#         return len(self.data)
     
-    def columnCount(self, index):
-        return len(self.data[0])
+#     def columnCount(self, index):
+#         return len(self.data[0])
     
-    def setData(self, index, value):
-        if isinstance(value, str):
-            tempString = ""
-            tempString += str(index + 1)
-            tempString += ") " + value
-            self.data[index][0] = tempString
-            return True
-        return False
+#     def setData(self, index, value):
+#         if isinstance(value, str):
+#             tempString = ""
+#             tempString += str(index + 1)
+#             tempString += ") " + value
+#             self.data[index][0] = tempString
+#             return True
+#         return False
     
 
 
@@ -445,6 +501,21 @@ class EndScreenWidget(QWidget):
         self.layout.addWidget()
 
 
+#*************************************
+#*  Start of functionality functions
+#*************************************
+
+
+def playButtonPressed(self):
+        # > Check if the progress bar is running
+        # > If it is running, then stop the progress bar (and eventually stop the song)
+        # > If it isn't running, then start the progress bar (and eventually start the song)
+        if self.debugMode:
+            print("ProgressBarRunning", self.ProgressBarRunning)
+        if self.ProgressBarRunning == 0: 
+            self.startProgress()
+        else:
+            self.stopProgress()
 
 # @class: Class that makes the actual window that the user will see
 class Window(QMainWindow):
@@ -476,7 +547,6 @@ class Window(QMainWindow):
 
     def changeEndScreen(self, widget):
         self.setCentralWidget(widget)
-
 
 
 #******************
