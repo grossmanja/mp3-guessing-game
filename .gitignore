@@ -133,3 +133,6 @@ dmypy.json
 
 # MP3 Files
 music-test/
+
+# Ignore folder
+ignore/
