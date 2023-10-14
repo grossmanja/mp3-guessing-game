@@ -223,6 +223,7 @@ class MainWidget(QWidget):
         self.completer.setCaseSensitivity(0)
         lineEdit.setCompleter(self.completer)
     
+    # TODO: delete this code, as it is deprecated
     # def createGuessTable(self):
     #     self.guessTable = QTableView()
     #     # self.guessTable.setRowCount(6)
@@ -277,8 +278,6 @@ class MainWidget(QWidget):
                 border: 2px;
                 border-radius: 7px;
                 font-size:18;                       
-                                      
-        
         """)
 
         self.guessTable.setFont(QFont("Roboto", 18))
@@ -370,16 +369,14 @@ class MainWidget(QWidget):
 
     # @method: Adds guess to the guess table, index based on self.currentGuessIndex
     def updateGuessTable(self, guess="Skipped"):
-        # self.model.setData(self.currentGuessIndex, guess)
         tempString = str(self.currentGuessIndex + 1) + ") " + guess
-        # tempString 
-        
-        tempTableItem = QTableWidgetItem(tempString)
+        # tempString = "X) " + guess
+        # tempString = str(self.currentGuessIndex + 1) + ") X - " + guess
 
+        tempTableItem = QTableWidgetItem(tempString)
         tempTableItem.setForeground(QColor(255, 0, 0))
 
         self.guessTable.setItem(self.currentGuessIndex, 0, tempTableItem)
-        # self.guessTable.g
 
         self.guessTable.repaint()
 
@@ -401,7 +398,7 @@ class MainWidget(QWidget):
 
 
 
-
+# TODO: Delete this class, as it is deprecated
 # # @class: Class that handles the table for showing guesses
 # class TableModel(QAbstractTableModel):
 #     def __init__(self, data):
