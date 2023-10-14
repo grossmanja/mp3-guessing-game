@@ -1,7 +1,10 @@
 # from PyQt5.QtWidgets import QApplication, QLabel, QProgressBar, QPushButton, QWidget, QGridLayout, QMainWindow, QStatusBar
+import typing
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QWidget
 import qdarkstyle
 import sys
 import time
@@ -133,7 +136,7 @@ class MainWidget(QWidget):
                           "}"
                                        "QProgressBar::chunk "
                           "{"
-                          "background-color: white;"
+                          "background-color: green;"
                           "}")
 
 
@@ -174,7 +177,7 @@ class MainWidget(QWidget):
 
     # @method: Creates the Grid Layout that the buttons go in
     def createLayout(self):
-        self.layout  = QGridLayout()
+        self.layout = QGridLayout()
         self.layout.addWidget(self.ProgressBar, 5, 0, 1, 5)
         self.layout.addWidget(self.PlayButton, 4, 2)
         self.layout.addWidget(self.SkipButton, 4, 4)
@@ -372,8 +375,74 @@ class TableModel(QAbstractTableModel):
 
 
 # @class: The Victory/Defeat Screen Widget that appears after you either guess correctly, or after 6 incorrect guesses
+class EndScreenWidget(QWidget):
+    def __init__(self, isWinner, currentSong):
+        super().__init__()
+
+        self.initVariables(isWinner, currentSong)
 
 
+    def initVariables(self, isWin, currentSong):
+        self.isWin = isWin
+        self.resultMessage = QLabel()
+        self.currentSong = QLabel()
+
+
+    def initUI(self):
+        self.createSongBox()
+    
+    def createSongBox(self):
+        self.songBox = QLabel()
+    
+    def createAlbumPicture(self):
+        self.albumPicture = QPixmap()
+
+    def createVictoryMessage(self):
+        self.resultMessage.setText("You Win!")
+
+    def createFailMessage(self):
+        self.resultMessage.setText("You Lose!")
+    
+    def createPlayBUtton(self):
+        self.PlayButton = QPushButton(self)
+        self.PlayButton.clicked.connect(self.playButtonPressed)
+
+        self.PlayButton.setIcon(QIcon("PlayButton.png"))
+        self.PlayButton.setIconSize(QSize(100,100))
+        self.PlayButton.setMaximumSize(QSize(120,120))
+
+        self.PlayButton.setStyleSheet("background-color:transparent")
+        self.PlayButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+    def createProgressBar(self):
+        # creating progress bar
+        self.ProgressBar = QProgressBar(self)
+
+        #set progress bar's max steps
+        self.ProgressBar.setMaximum(self.limits[-1])
+
+        #Update the Progress Bar visual each time the Progress Bar step is increased 
+        self.ProgressBar.valueChanged.connect(self.ProgressBar.repaint)
+
+        #Hide the percent number on the progress bar
+        self.ProgressBar.setTextVisible(False)
+
+        if self.debugMode: print(self.ProgressBar.maximum())
+
+        self.ProgressBar.setStyleSheet( "QProgressBar"
+                          "{"
+                          "background-color: steelblue;"
+                          "}"
+                                       "QProgressBar::chunk "
+                          "{"
+                          "background-color: green;"
+                          "}")
+
+
+    
+    def createLayout(self):
+        self.layout = QGridLayout()
+        self.layout.addWidget()
 
 
 
@@ -405,8 +474,8 @@ class Window(QMainWindow):
         self.show()
 
 
-    def changeEndScreen(self):
-        self.setCentralWidget()
+    def changeEndScreen(self, widget):
+        self.setCentralWidget(widget)
 
 
 
