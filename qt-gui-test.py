@@ -75,7 +75,7 @@ class MainWidget(QWidget):
 
     # @method: initializes the class variables
     def initVariables(self):
-        #set time limits
+        #set time limits, each limit is multiplied by 0.05, so a limit of 20 = 1 second
         self.limits = [20,40,80,140,220,320]
 
         #set starting index in self.limits
@@ -104,6 +104,8 @@ class MainWidget(QWidget):
         self.createQCompleter(self.inputTextbox)
         self.createSearchEnterButton()
         self.createGuessTable()
+        self.createGuessCounter()
+        self.createCurrentSongTime()
 
         self.createLayout()
 
@@ -142,11 +144,14 @@ class MainWidget(QWidget):
 
     # @method: Creates the skip button, which skips guess and increases the song limit
     def createSkipButton(self):
-        self.SkipButton = QPushButton("Skip", self)
-        self.SkipButton.clicked.connect(self.skipButtonPressed)
+        self.skipButton = QPushButton("Skip", self)
+        self.skipButton.clicked.connect(self.skipButtonPressed)
 
-        self.SkipButton.setMaximumSize(QSize(100,50))
-        self.SkipButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        self.skipButton.setMaximumSize(QSize(150,50))
+        self.skipButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+
+        self.skipButton.setFont(QFont("Roboto", 16))
+        self.skipButton.setStyleSheet("border-radius:10px")
 
 
     # @method: Creates the play button, which starts and stops the song depending if the song is playing or not
@@ -159,14 +164,14 @@ class MainWidget(QWidget):
         self.PlayButton.setMaximumSize(QSize(120,120))
 
         self.PlayButton.setStyleSheet("background-color:transparent")
-        self.PlayButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.PlayButton.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
 
 
     # @method: Creates the input textbox, where the player guesses what the current song is
     def createInputTextbox(self):
         self.inputTextbox = QLineEdit(self)
         self.inputTextbox.setPlaceholderText("Enter Guess Here")
-        self.inputTextbox.setStyleSheet("background-color:LightBlue; color:black")
+        self.inputTextbox.setStyleSheet("background-color:LightBlue; color:black; border-radius:10px")
 
         self.inputTextbox.setMaximumHeight(100)
         self.inputTextbox.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
@@ -179,41 +184,15 @@ class MainWidget(QWidget):
         self.searchEnterButton = QPushButton("Guess", self)
         self.searchEnterButton.clicked.connect(self.checkGuess)
 
-        self.searchEnterButton.setMaximumSize(QSize(100,50))
-        self.PlayButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.searchEnterButton.setMaximumSize(QSize(150,50))
+        self.searchEnterButton.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
 
+        self.searchEnterButton.setFont(QFont("Roboto", 16))
+        self.searchEnterButton.setStyleSheet("border-radius:10px")
 
-    # @method: Creates the Grid Layout that the buttons go in
-    def createLayout(self):
-        self.layout = QGridLayout()
-        self.layout.addWidget(self.ProgressBar, 5, 0, 1, 5)
-        self.layout.addWidget(self.PlayButton, 4, 2)
-        self.layout.addWidget(self.SkipButton, 6, 0)
-        self.layout.addWidget(self.inputTextbox, 6, 1, 1, 3)
-        self.layout.addWidget(self.searchEnterButton, 6, 4)
-        self.layout.addWidget(self.guessTable, 1, 1, 3, 3)
-
-        for i in range(self.layout.rowCount()):
-            self.layout.setRowStretch(i, 1)
-        
-        # for i in range(self.layout.columnCount()):
-        self.layout.setColumnStretch(0, 0)
-        self.layout.setColumnMinimumWidth(0, 100)
-
-        self.layout.setColumnStretch(4, 0)
-        self.layout.setColumnMinimumWidth(4, 100)
-
-        self.layout.setRowStretch(0, 0)
-        self.layout.setRowMinimumHeight(0, 10)
-        
-        if self.debugMode: print("row:", self.layout.rowCount(),"column", self.layout.columnCount())
-
-        self.setLayout(self.layout)
-
-
-    # @method: Creates a debug list for qCompleter
+   # @method: Creates a debug list for qCompleter
     def createDebugList(self):
-        self.debugList = ["ABC", "Test", "The Boxer"]
+        self.debugList = ["ABC", "Test", "The Boxer", "Debug"]
 
 
     # @method: Creates a the QCompleter that auto-completes the text in the search box
@@ -287,7 +266,49 @@ class MainWidget(QWidget):
             tempString = str(i+1)
             tempString += ")"
             self.guessTable.setItem(i, 0, QTableWidgetItem(tempString))
-            
+    
+    def createGuessCounter(self):
+        self.guessCounter = QLabel("1/6")
+        self.guessCounter.setFont(QFont("Roboto", 14))
+        self.guessCounter.setAlignment(Qt.AlignBottom)
+    
+    def createCurrentSongTime(self):
+        self.currentSongTime = QLabel("00:00/00:01")
+        self.currentSongTime.setFont(QFont("Roboto", 14))
+        self.currentSongTime.setAlignment(Qt.AlignBottom)
+
+
+    # @method: Creates the Grid Layout that the buttons go in
+    def createLayout(self):
+        self.layout = QGridLayout()
+        self.layout.addWidget(self.ProgressBar, 5, 0, 1, 5)
+        self.layout.addWidget(self.PlayButton, 4, 2)
+        self.layout.addWidget(self.skipButton, 6, 0)
+        self.layout.addWidget(self.inputTextbox, 6, 1, 1, 3)
+        self.layout.addWidget(self.searchEnterButton, 6, 4)
+        self.layout.addWidget(self.currentSongTime, 4, 4)
+        self.layout.addWidget(self.guessCounter, 4, 0)
+        self.layout.addWidget(self.guessTable, 1, 1, 3, 3)
+
+        for i in range(self.layout.rowCount()):
+            self.layout.setRowStretch(i, 1)
+        
+        # for i in range(self.layout.columnCount()):
+        self.layout.setColumnStretch(0, 0)
+        self.layout.setColumnMinimumWidth(0, 100)
+
+        self.layout.setColumnStretch(4, 0)
+        self.layout.setColumnMinimumWidth(4, 100)
+
+        self.layout.setRowStretch(0, 0)
+        self.layout.setRowMinimumHeight(0, 10)
+        
+        if self.debugMode: print("row:", self.layout.rowCount(),"column", self.layout.columnCount())
+
+        self.setLayout(self.layout)
+
+
+             
 
 
 
@@ -350,13 +371,17 @@ class MainWidget(QWidget):
         # > if we're at the end of the list, then just return to prevent out of index
         # TODO: Make it a failure to skip when at max limit
         if self.currentGuessIndex == len(self.limits) - 1: 
-            return
+            return False
 
         self.currentGuessIndex += 1
         self.currentLimit = self.limits[self.currentGuessIndex]
+        self.updateGuessCounter()
+
 
         if self.thread in locals():
             self.thread.updateCurrentLimit(self.currentLimit)
+
+        return True
     
     def skipButtonPressed(self):
         # TODO: Make it a fail when you skip at the last guess
@@ -384,7 +409,7 @@ class MainWidget(QWidget):
     # @method: Takes the text from the textbox, check if it is a valid song, and then checks if it matches the mystery song
     def checkGuess(self):
         guess = self.inputTextbox.text()
-        if self.debugMode: print(guess)
+        if self.debugMode: print("Guess is:", guess)
         if not guess:
             if self.debugMode: print("Empty guess")
             return
@@ -393,8 +418,13 @@ class MainWidget(QWidget):
             if self.debugMode: print("WINNER")
         else:
             if self.debugMode: print("FAILURE")
-            self.updateGuessTable(guess)
             self.increaseLimit()
+            self.updateGuessTable(guess)
+    
+    def updateGuessCounter(self):
+        tempString = str(self.currentGuessIndex) + "/6"
+        self.guessCounter.setText(tempString)
+        self.guessCounter.repaint()
 
 
 
@@ -443,6 +473,9 @@ class EndScreenWidget(QWidget):
 
     def initUI(self):
         self.createSongBox()
+        self.createAlbumPicture()
+        self.createPlayBUtton()
+        
     
     def createSongBox(self):
         self.songBox = QLabel()
@@ -467,32 +500,6 @@ class EndScreenWidget(QWidget):
         self.PlayButton.setStyleSheet("background-color:transparent")
         self.PlayButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
-    def createProgressBar(self):
-        # creating progress bar
-        self.ProgressBar = QProgressBar(self)
-
-        #set progress bar's max steps
-        self.ProgressBar.setMaximum(self.limits[-1])
-
-        #Update the Progress Bar visual each time the Progress Bar step is increased 
-        self.ProgressBar.valueChanged.connect(self.ProgressBar.repaint)
-
-        #Hide the percent number on the progress bar
-        self.ProgressBar.setTextVisible(False)
-
-        if self.debugMode: print(self.ProgressBar.maximum())
-
-        self.ProgressBar.setStyleSheet( "QProgressBar"
-                          "{"
-                          "background-color: steelblue;"
-                          "}"
-                                       "QProgressBar::chunk "
-                          "{"
-                          "background-color: green;"
-                          "}")
-
-
-    
     def createLayout(self):
         self.layout = QGridLayout()
         self.layout.addWidget()
