@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QWidget
 import qdarkstyle
 import sys
 import time
+import math
 
 global isDebugModeOn
 isDebugModeOn = True
@@ -201,42 +202,7 @@ class MainWidget(QWidget):
         self.completer = QCompleter(self.debugList, lineEdit)
         self.completer.setCaseSensitivity(0)
         lineEdit.setCompleter(self.completer)
-    
-    # TODO: delete this code, as it is deprecated
-    # def createGuessTable(self):
-    #     self.guessTable = QTableView()
-    #     # self.guessTable.setRowCount(6)
-    #     for i in range(6):
-    #         self.guessTable.showRow(i)
-
-    #     self.guessTable.showColumn(0)
-    #     self.guessTable.resizeRowsToContents()
-
-    #     self.guessTable.verticalHeader().hide()
-    #     self.guessTable.horizontalHeader().hide()
-
-    #     self.guessTable.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-    #     self.guessTable.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-    #     self.guessTable.setShowGrid(False)
-        
-    #     self.guessTable.setStyleSheet("""
-    #         QTableView::item
-    #             border: 2px;
-    #             border-radius: 7px;
-    #             font-size:18;
-    #         """
-    #     )
-
-    #     self.guessTable.setFont(QFont("Roboto", 18))
-
-    #     temp = []
-    #     for i in range(6):
-    #         tempString = str(i+1)
-    #         tempString += ")"
-    #         temp.append([tempString])
-
-    #     self.model = TableModel(temp)
-    #     self.guessTable.setModel(self.model)
+   
 
     #@method: This version of createGuessTable will use QTableWidget instead of QTableView
     def createGuessTable(self):
@@ -364,6 +330,8 @@ class MainWidget(QWidget):
     # @method: Sets the progress bar value to the parameter value
     def setProgressValue(self, value):
         self.ProgressBar.setValue(value)
+        if value % 20 == 0:
+            self.updateCurrentSongTime(value)
         
 
     # @method: Increases the time limit of the song, based on the values in self.currentGuessIndex
@@ -390,6 +358,7 @@ class MainWidget(QWidget):
         else:
             self.updateGuessTable()
             self.increaseLimit()
+            self.updateCurrentSongTime()
 
 
     # @method: Adds guess to the guess table, index based on self.currentGuessIndex
@@ -397,9 +366,12 @@ class MainWidget(QWidget):
         tempString = str(self.currentGuessIndex + 1) + ") " + guess
         # tempString = "X) " + guess
         # tempString = str(self.currentGuessIndex + 1) + ") X - " + guess
-
         tempTableItem = QTableWidgetItem(tempString)
-        tempTableItem.setForeground(QColor(255, 0, 0))
+
+        if guess == "Skipped":
+            tempTableItem.setForeground(QColor(125, 125, 125))
+        else:
+            tempTableItem.setForeground(QColor(255, 0, 0))
 
         self.guessTable.setItem(self.currentGuessIndex, 0, tempTableItem)
 
@@ -418,41 +390,59 @@ class MainWidget(QWidget):
             if self.debugMode: print("WINNER")
         else:
             if self.debugMode: print("FAILURE")
-            self.increaseLimit()
             self.updateGuessTable(guess)
+            self.increaseLimit()
     
     def updateGuessCounter(self):
-        tempString = str(self.currentGuessIndex) + "/6"
+        tempString = str(self.currentGuessIndex + 1) + "/6"
         self.guessCounter.setText(tempString)
         self.guessCounter.repaint()
-
-
-
-# TODO: Delete this class, as it is deprecated
-# # @class: Class that handles the table for showing guesses
-# class TableModel(QAbstractTableModel):
-#     def __init__(self, data):
-#         super(TableModel, self).__init__()
-#         self.data = data
-
-#     def data(self, index, role):
-#         if role == Qt.ItemDataRole.DisplayRole:
-#             return self.data[index.row()][0]
     
-#     def rowCount(self, index):
-#         return len(self.data)
-    
-#     def columnCount(self, index):
-#         return len(self.data[0])
-    
-#     def setData(self, index, value):
-#         if isinstance(value, str):
-#             tempString = ""
-#             tempString += str(index + 1)
-#             tempString += ") " + value
-#             self.data[index][0] = tempString
-#             return True
-#         return False
+    def updateCurrentSongTime(self, currentTime=0):
+        if self.debugMode: print(currentTime, currentTime/20)
+        
+        currentMinute = str(int(math.floor((currentTime/20)/60)))
+        currentSecond = str(int((currentTime/20) % 60))
+        limitMinute = str(int(math.floor((self.currentLimit/20)/60)))
+        limitSecond = str(int((self.currentLimit/20) % 60))
+        formattedCurrentTime = ""
+        
+        # > If the current minute is less than 10 minutes, add a leading 0
+        if float(currentMinute) < 10:
+            formattedCurrentTime =  "0" + currentMinute
+        else:
+            formattedCurrentTime = currentMinute
+        
+        formattedCurrentTime += ":"
+
+        # > If the current minute is less than 10 seconds, add a leading 0
+        if float(currentSecond) < 10:
+            formattedCurrentTime += "0" + currentSecond
+        else:
+            formattedCurrentTime += currentSecond
+
+
+        formattedCurrentTime += "/"
+
+        # > If the limit minute is less than 10 minutes, add a leading 0
+        if float(limitMinute) < 10:
+            formattedCurrentTime += "0" + limitMinute
+        else:
+            formattedCurrentTime = limitMinute
+        
+        formattedCurrentTime += ":"
+
+        # > If the limit second is less than 10 seconds, add a leading 0 
+        if float(limitSecond) < 10:
+            formattedCurrentTime += "0" + limitSecond
+        else:
+            formattedCurrentTime += limitSecond
+        
+        self.currentSongTime.setText(formattedCurrentTime)
+
+
+
+
     
 
 
